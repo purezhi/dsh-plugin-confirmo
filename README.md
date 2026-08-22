@@ -6,6 +6,16 @@
 
 > 交互、视觉与素材规范均致敬 confirmo.love 及其社区精灵图画廊。
 
+## 📸 效果预览
+
+| 默认猫咪 | 社区精灵（待机） | 工作状态 |
+|---|---|---|
+| ![默认猫咪](docs/shot-cat.png) | ![精灵待机](docs/shot-idle.png) | ![工作状态](docs/shot-working.png) |
+
+| 开心 | 兴奋 | 睡觉 |
+|---|---|---|
+| ![开心](docs/shot-happy.png) | ![兴奋](docs/shot-excited.png) | ![睡觉](docs/shot-sleep.png) |
+
 ## ✨ 功能
 
 ### 默认形象

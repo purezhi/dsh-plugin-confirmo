@@ -1,0 +1,25 @@
+{
+  "name": "dsh-plugin-confirmo",
+  "version": "1.0.0",
+  "description": "Confirmo 桌宠 for the DSH UI. A replica of the confirmo.love AI coding companion: the yellow cat mascot by default, with support for community sprites from sprites.confirmo.love (magenta chroma-key sprite sheets, 8x7 frame grid). Drag to reposition, right-click to switch sprite.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "types": "./lib/types/client/index.d.ts",
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "client": {
+      "inject": [],
+      "platform": "web"
+    }
+  },
+  "license": "MIT"
+}

@@ -2,15 +2,15 @@
 
 在 [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) 的 Web UI 里复刻
 [confirmo.love](https://confirmo.love/) 的桌宠体验：一只会动、可拖拽、可换形象的 AI 编码小伙伴，
-并完整支持 [sprites.confirmo.love](https://sprites.confirmo.love/) 社区精灵图。
+并支持 [sprites.confirmo.love](https://sprites.confirmo.love/) 社区精灵图。
 
 > 交互、视觉与素材规范均致敬 confirmo.love 及其社区精灵图画廊。
 
 ## 📸 效果预览
 
-| 默认猫咪 | 社区精灵（待机） | 工作状态 |
+| 默认 | 待机 | 工作状态 |
 |---|---|---|
-| ![默认猫咪](docs/shot-cat.png) | ![精灵待机](docs/shot-idle.png) | ![工作状态](docs/shot-working.png) |
+| ![默认](docs/shot-cat.png) | ![待机](docs/shot-idle.png) | ![工作状态](docs/shot-working.png) |
 
 | 开心 | 兴奋 | 睡觉 |
 |---|---|---|
@@ -21,9 +21,9 @@
 ### 默认形象
 
 confirmo.love 同款黄猫（SVG 复刻官方 logo，渐变 `#FCD34D→#F59E0B`）：
-浮动 / 眨眼 / 耳朵抖动 / 胡须摆动 / 高光闪烁 / 尾巴摆动，动画与官网一致。
+浮动 / 眨眼 / 耳朵抖动 / 胡须摆动 / 高光闪烁 / 尾巴摆动。
 
-### 7 个精灵状态（全部实现）
+### 7 个精灵状态
 
 每个 sprite 是 **8 列 × 7 行 = 56 帧** 的精灵图，每行一个动画：
 
@@ -44,19 +44,10 @@ confirmo.love 同款黄猫（SVG 复刻官方 logo，渐变 `#FCD34D→#F59E0B`�
 
 ### 社区 sprite 支持
 
-- **在线拉取清单**：node 端在 DSH webServer 注册 `/confirmo/sprites` 代理路由（画廊 API
-  的 CORS 只允许画廊域名，服务端代理绕开），菜单实时显示最新 sprite
-- **分层本地缓存**：
-  - **L1** 全分辨率抠图结果（IndexedDB / WebP / 512px 帧，保留 12 个）——秒开
-  - **L2** 中分辨率抠图结果（384px 帧，覆盖 60 个备选）
-  - **L3** 原始 sheet 磁盘缓存（node 端写入 `~/.dsh/cache/confirmo/`，经
-    `/confirmo/sprite/<id>` 同源路由提供——跨浏览器清理/重启保留，二次请求毫秒级）
-  - 加载优先级 L1 → L2 → 磁盘/在线 → 重抠；URL 变化自动失效；各层独立 LRU；
-    IndexedDB 异常 3 秒超时回退，绝不阻塞显示；算法升级自动清缓存（DB 版本机制）
-- **抠图**：纯品红 `#ff00ff` 背景自动抠除，移植官网画廊同款流水线（边缘采样检测底色、
-  泛洪连通抠除、距离场羽化、溢色去除、去污染），对非标准品红背景（如深紫）也鲁棒
+- **在线拉取清单**：菜单支持实时显示社区最新 sprite
+- **分层本地缓存**：缓存正在使用的 sprite，提升加载速度
+- **抠图**：纯品红 `#ff00ff` 背景自动抠除，移植官网画廊同款流水线，对非标准品红背景（如深紫）也鲁棒
 - **空闲预取**：启动预热 + 入睡时用空闲带宽逐个补齐磁盘缓存
-- 内置 60 个热门 sprite 快照兜底（`sprite_list.json`）
 
 ### 交互与细节
 

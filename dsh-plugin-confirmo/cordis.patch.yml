@@ -1,0 +1,5 @@
+# Confirmo companion plugin: a client-only UI plugin (empty node apply) whose
+# browser half is discovered via the package.json dshClient declaration.
+- insert:
+    - id: confirmo
+      name: dsh-plugin-confirmo

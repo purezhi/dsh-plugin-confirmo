@@ -10,11 +10,11 @@
 
 | 默认 | 待机 | 工作状态 |
 |---|---|---|
-| ![默认](docs/shot-cat.png) | ![待机](docs/shot-idle.png) | ![工作状态](docs/shot-working.png) |
+| ![默认](docs/screenshots/shot-cat.png) | ![待机](docs/screenshots/shot-idle.png) | ![工作状态](docs/screenshots/shot-working.png) |
 
 | 开心 | 兴奋 | 睡觉 |
 |---|---|---|
-| ![开心](docs/shot-happy.png) | ![兴奋](docs/shot-excited.png) | ![睡觉](docs/shot-sleep.png) |
+| ![开心](docs/screenshots/shot-happy.png) | ![兴奋](docs/screenshots/shot-excited.png) | ![睡觉](docs/screenshots/shot-sleep.png) |
 
 ## ✨ 功能
 
@@ -107,8 +107,13 @@ confirmo/
 ├── LICENSE
 ├── README.md
 ├── install.sh / uninstall.sh
+├── docs/
+│   ├── screenshots/         # 效果预览截图（README 引用）
+│   ├── sprites/             # 社区 sprite 素材（git 排除, 用 download-sprites.mjs 重新下载）
+│   └── submission/          # 1024Store 插件市场投稿文件
 └── dsh-plugin-confirmo/
-    ├── package.json        # 声明 dsh.client (platform: web), 导出 ./client
+    ├── package.json        # 声明 dsh.bundle.patch + dsh.client (platform: web), 导出 ./client
+    ├── cordis.patch.yml    # bundle patch: 注册 confirmo 插件到 cordis 配置
     ├── sprite_list.json    # 内置 sprite 快照(60 个热门 sprite 的 URL 清单)
     ├── build.js            # 构建脚本
     └── lib/

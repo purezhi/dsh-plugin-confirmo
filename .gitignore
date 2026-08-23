@@ -4,5 +4,5 @@
 /tmp/
 
 # 下载的 sprite 素材（体积大，不入库；按需用脚本重新下载）
-docs/assets/*
-!docs/assets/README.md
+docs/sprites/*
+!docs/sprites/README.md

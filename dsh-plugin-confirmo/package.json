@@ -16,10 +16,17 @@
     "./package.json": "./package.json"
   },
   "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
       "inject": [],
       "platform": "web"
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/purezhi/dsh-plugin-confirmo"
   },
   "license": "MIT"
 }

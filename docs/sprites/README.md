@@ -6,7 +6,7 @@
 ## 结构
 
 ```
-docs/assets/<sprite-id>/
+docs/sprites/<sprite-id>/
 ├── sprite.png|jpg      # 8列×7行=56帧精灵图（原始素材）
 ├── thumbnail.png|jpg   # 画廊缩略图
 └── processed.png       # 处理后的单角色透明图（仅部分 sprite 有）
@@ -20,5 +20,12 @@ docs/assets/<sprite-id>/
 
 ## 重新下载
 
-按 `sprite_list.json` 中每个 sprite 的 `spriteUrl` / `thumbnailUrl` / `processedThumbnailUrl`
-字段下载到对应 `<sprite-id>/` 文件夹即可（脚本见仓库 issue 或自行编写）。
+运行本目录下的下载脚本：
+
+```bash
+node docs/sprites/download-sprites.mjs
+```
+
+脚本会读取 `dsh-plugin-confirmo/sprite_list.json`，按每个 sprite 的
+`spriteUrl` / `thumbnailUrl` / `processedThumbnailUrl` 字段下载到对应 `<sprite-id>/` 文件夹。
+已存在且大小相同的文件会跳过（断点续传），可随时重复运行。

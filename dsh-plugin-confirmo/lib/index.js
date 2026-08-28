@@ -14,17 +14,24 @@
  *    unlimited by browser quota, and are instantly re-servable. Only
  *    pub-sprites.confirmo.love URLs are accepted.
  *
+ * 3. GET /confirmo/local/<file> — bundled assets served straight from the
+ *    plugin package (no download, no cache). Used for the built-in default
+ *    sprite (e.g. assets/mj.png).
+ *
  * `inject: ['webServer']` mirrors the pattern of dsh-community-market: it
  * tells the cordis loader to only apply this plugin once the webServer
  * service exists, so `ctx.webServer.register(...)` is safe to call.
  */
 import { mkdir, readFile, rename, stat, writeFile } from "node:fs/promises";
+import { dirname, extname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
-import { extname, join } from "node:path";
 
 export const name = "confirmo";
 export const inject = ["webServer"];
 
+const PACKAGE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const ASSETS_DIR = join(PACKAGE_ROOT, "assets");
 const CACHE_DIR = join(process.env.DSH_HOME || join(homedir(), ".dsh"), "cache", "confirmo");
 const ALLOWED_PREFIX = "https://pub-sprites.confirmo.love/";
 const MIME = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp" };
@@ -118,6 +125,38 @@ function apply(ctx) {
         }
       }
     }), "confirmo: sprite sheet disk-cache route");
+
+    // 3) bundled assets (built-in default sprite): GET /confirmo/local/<path>
+    ctx.effect(() => ctx.webServer.register({
+      kind: "prefixes",
+      path: "/confirmo/local",
+      handler: async (req, res) => {
+        try {
+          const u = new URL(req.url ?? "/", "http://x");
+          const rel = decodeURIComponent(u.pathname.slice("/confirmo/local/".length));
+          // path traversal guard: must resolve inside ASSETS_DIR
+          const full = resolve(ASSETS_DIR, rel);
+          if (full !== ASSETS_DIR && !full.startsWith(ASSETS_DIR + "/")) {
+            res.writeHead(400, { "content-type": "application/json" });
+            res.end(JSON.stringify({ error: "invalid local asset path" }));
+            return;
+          }
+          const data = await readFile(full);
+          const ext = extname(rel).toLowerCase();
+          res.writeHead(200, {
+            "content-type": MIME[ext] ?? "application/octet-stream",
+            // local bundled assets change between releases: never cache them so a
+            // re-served sheet always reflects the packaged file
+            "cache-control": "no-cache",
+            "access-control-allow-origin": "*"
+          });
+          res.end(data);
+        } catch (err) {
+          res.writeHead(404, { "content-type": "application/json" });
+          res.end(JSON.stringify({ error: "asset not found" }));
+        }
+      }
+    }), "confirmo: bundled asset route");
   } catch (err) {
     // route registration unavailable — browser half falls back to the CDN directly
     try { ctx.logger.warn("confirmo: failed to register routes: " + String((err && err.message) || err)); } catch (_) {}

@@ -8,20 +8,15 @@
 
 ## 📸 效果预览
 
-| 默认 | 待机 | 工作状态 |
+| 待机 | 拖拽 | 工作状态 |
 |---|---|---|
-| ![默认](docs/screenshots/shot-cat.png) | ![待机](docs/screenshots/shot-idle.png) | ![工作状态](docs/screenshots/shot-working.png) |
+| ![默认](docs/screenshots/shot-idle.png) | ![待机](docs/screenshots/shot-drag.png) | ![工作状态](docs/screenshots/shot-working.png) |
 
 | 开心 | 兴奋 | 睡觉 |
 |---|---|---|
 | ![开心](docs/screenshots/shot-happy.png) | ![兴奋](docs/screenshots/shot-excited.png) | ![睡觉](docs/screenshots/shot-sleep.png) |
 
 ## ✨ 功能
-
-### 默认形象
-
-confirmo.love 同款黄猫（SVG 复刻官方 logo，渐变 `#FCD34D→#F59E0B`）：
-浮动 / 眨眼 / 耳朵抖动 / 胡须摆动 / 高光闪烁 / 尾巴摆动。
 
 ### 7 个精灵状态
 
@@ -125,7 +120,7 @@ confirmo/
 ## 📜 致谢与声明
 
 - 复刻自 [confirmo.love](https://confirmo.love/) 的交互体验与视觉风格，精灵图规范来自
-  [sprites.confirmo.love](https://sprites.confirmo.love/) 社区
+  [sprites.confirmo.love](https://sprites.confirmo.love/) 社区（完整规范见 [`docs/sprite-spec.md`](docs/sprite-spec.md)）
 - 精灵图素材版权归各自作者所有；本项目仅嵌入其 URL 清单，运行时从官方服务器加载
 - 本项目为独立开源实现，与 confirmo.love 无隶属关系
 

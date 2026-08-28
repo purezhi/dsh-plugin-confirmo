@@ -7,6 +7,25 @@ window.__ModuleLoader__.load({
 
 		//#region sprite list (embedded snapshot of trending sprites.confirmo.love)
 		var SPRITE_LIST = __SPRITE_LIST_JSON__;
+
+		// Built-in default sprite "MJ": preprocessed (magenta keyed, frames
+		// horizontally centered + feet aligned, per-row unified scale) and
+		// bundled in assets/mj/, served by the node half at
+		// /confirmo/local/mj/sheet.png — no runtime chroma-keying needed.
+		// The id/URL carry version suffixes so stale IndexedDB/HTTP cache
+		// entries of older MJ sheets are never hit.
+		var MJ_SPRITE = {
+			id: "mj-v4",
+			name: "MJ",
+			spriteUrl: "/confirmo/local/mj/sheet.png?v=4",
+			thumbnailUrl: "/confirmo/local/mj/thumb.png?v=4",
+			processedThumbnailUrl: "/confirmo/local/mj/thumb.png?v=4",
+			frameWidth: 256,
+			frameHeight: 256,
+			frameCount: 56,
+			local: true,
+			preprocessed: true
+		};
 		//#endregion
 
 		//#region confirmo cat markup — replica of the confirmo.love mascot
@@ -375,7 +394,7 @@ window.__ModuleLoader__.load({
 			if (idbPromise) return idbPromise;
 			idbPromise = new Promise(function (resolve, reject) {
 				try {
-					var req = indexedDB.open(IDB_NAME, 3);
+					var req = indexedDB.open(IDB_NAME, 4);
 					req.onupgradeneeded = function () {
 						var db = req.result;
 						// Every cache-schema / chroma-key algorithm change bumps the
@@ -520,6 +539,17 @@ window.__ModuleLoader__.load({
 					img.onload = function () {
 						try {
 							var w = img.naturalWidth, h = img.naturalHeight;
+							if (sprite.preprocessed) {
+								// built-in sprites are pre-keyed + frame-centered at build time:
+								// skip chroma-keying, slice the frames directly
+								var c2 = document.createElement("canvas");
+								c2.width = w; c2.height = h;
+								var g2 = c2.getContext("2d");
+								g2.drawImage(img, 0, 0);
+								var result2 = splitFrames(c2, w, h);
+								resolve(result2);
+								return;
+							}
 							// Key the magenta at a reduced working resolution (fast), then
 							// carry that alpha mask onto the FULL-resolution image so the
 							// frames keep all original detail (crisper than the macOS app
@@ -558,9 +588,14 @@ window.__ModuleLoader__.load({
 						}
 						reject(new Error("sprite image load failed"));
 					};
-					// serve through the node disk-cache route when available (same-origin,
-					// persistent on disk); falls back to the CDN above
-					img.src = "/confirmo/sprite/" + encodeURIComponent(sprite.id) + "?url=" + encodeURIComponent(sprite.spriteUrl);
+					// built-in local sprites load straight from the bundled asset route;
+					// remote sheets go through the node disk-cache route (same-origin,
+					// persistent on disk) and fall back to the CDN above
+					if (sprite.local) {
+						img.src = sprite.spriteUrl;
+					} else {
+						img.src = "/confirmo/sprite/" + encodeURIComponent(sprite.id) + "?url=" + encodeURIComponent(sprite.spriteUrl);
+					}
 				});
 				});
 			});
@@ -1094,7 +1129,9 @@ window.__ModuleLoader__.load({
 				var restoreList = getSpriteList();
 				for (var i = 0; i < restoreList.length; i++) if (restoreList[i].id === state.spriteId) initial = restoreList[i];
 			}
-			if (initial) showSprite(initial); else showCat();
+			if (initial) showSprite(initial);
+			else if (MJ_SPRITE) showSprite(MJ_SPRITE);   // built-in default sprite
+			else showCat();
 
 			// warm the live sprite list in the background (menu rebuilds when it arrives),
 			// then prefetch a few sheets into the node disk cache
@@ -1203,15 +1240,20 @@ window.__ModuleLoader__.load({
 			// ---- live sprite list (via the node-half proxy route /confirmo/sprites) ----
 			// (liveSprites declared at the top of apply with the other state)
 			function getSpriteList() {
-				if (liveSprites && liveSprites.length) return liveSprites;
-				try {
-					var raw = localStorage.getItem(LIVE_KEY);
-					if (raw) {
-						var parsed = JSON.parse(raw);
-						if (Array.isArray(parsed) && parsed.length) return parsed;
-					}
-				} catch (e) {}
-				return SPRITE_LIST;
+				var base = [];
+				if (liveSprites && liveSprites.length) base = liveSprites;
+				else {
+					try {
+						var raw = localStorage.getItem(LIVE_KEY);
+						if (raw) {
+							var parsed = JSON.parse(raw);
+							if (Array.isArray(parsed) && parsed.length) base = parsed;
+						}
+					} catch (e) {}
+					if (!base.length) base = SPRITE_LIST;
+				}
+				// built-in default sprite always first
+				return [MJ_SPRITE].concat(base);
 			}
 			function normalizeSpriteList(raw) {
 				var out = [];
@@ -1270,6 +1312,8 @@ window.__ModuleLoader__.load({
 					var s = list[idx++];
 					done[s.id] = 1;
 					budget--;
+					// built-in local sprites need no disk caching
+					if (s.local) { setTimeout(step, 2500); return; }
 					// request through the node route so the raw sheet lands on disk;
 					// consume the body to release the connection
 					fetch("/confirmo/sprite/" + encodeURIComponent(s.id) + "?url=" + encodeURIComponent(s.spriteUrl), {
@@ -1376,7 +1420,7 @@ window.__ModuleLoader__.load({
 				var cur = head.querySelector(".cf-menu-cur");
 				var sizeBtns = head.querySelectorAll(".cf-menu-sizes button");
 				function refreshHead() {
-					cur.textContent = spriteMeta ? spriteMeta.name : "默认猫咪";
+					cur.textContent = spriteMeta ? spriteMeta.name : (MJ_SPRITE ? MJ_SPRITE.name : "默认猫咪");
 					for (var i = 0; i < sizeBtns.length; i++) {
 						var b = sizeBtns[i];
 						b.classList.toggle("on", Number(b.dataset.size) === state.size);
@@ -1463,9 +1507,9 @@ window.__ModuleLoader__.load({
 
 				function renderGrid() {
 					grid.innerHTML = "";
-					grid.appendChild(makeItem("", "默认猫咪", null));
+					grid.appendChild(makeItem(MJ_SPRITE.id, MJ_SPRITE.name, MJ_SPRITE.thumbnailUrl, MJ_SPRITE.processedThumbnailUrl));
 					var list = getSpriteList();
-					for (var i = 0; i < list.length; i++) {
+					for (var i = 1; i < list.length; i++) {
 						grid.appendChild(makeItem(list[i].id, list[i].name, list[i].thumbnailUrl, list[i].processedThumbnailUrl));
 					}
 				}
